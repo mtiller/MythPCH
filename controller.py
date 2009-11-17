@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
+# Import required modules
 import cherrypy
 import os, sys
 from genshi.template import TemplateLoader
 import MySQLdb
 
-loader = TemplateLoader(
-    os.path.join(os.path.dirname(__file__), 'templates'),
-    auto_reload=True)
-
+# This is just a little utility function
+# that queries the DB for specific
+# fields and then returns the result
+# in a dictionary
 def fetch(k, table, conn):
     cursor = conn.cursor()
     cmd = "SELECT %s FROM %s" % (",".join(k), table)
@@ -18,20 +19,45 @@ def fetch(k, table, conn):
         entries.append(stitch(row, k))
     cursor.close()
     return entries
-    
+
+# This is just a utility routine used by the
+# fetch function    
 def stitch(t, k):
     ret = {}
     for e in zip(t,k):
         ret[e[1]] = e[0]
     return ret
     
-
+# This is a class to represent the web site.
 class Root(object):
-    def __init__(self, user, password):
-        conn = MySQLdb.connect('127.0.0.1',
+    def __init__(self):
+        import ConfigParser
+
+        # Open configuration file
+        conf_file = os.path.join(os.path.dirname(__file__), 'mythpch.cfg')
+        options = ConfigParser.ConfigParser()
+        options.readfp(open(conf_file))
+
+        # Extract out select options
+        host = options.get("mysql", "host")
+        user = options.get("mysql", "user")
+        password = options.get("mysql", "password")
+        self.share = options.get("samba", "share")
+
+        # Connect to the SQL database
+        conn = MySQLdb.connect(host,
                                user=user,
                                passwd=password,
                                db='mythconverg')
+
+        # Create the template loader
+        self.loader = TemplateLoader(
+            os.path.join(os.path.dirname(__file__), 'templates'),
+            auto_reload=True)
+
+        # Load MySQL data.  This is a serious limitation in this
+        # version since the data is then static from that point
+        # on.  :-(
         entries = fetch(['title','subtitle','description',
                          'recgroup','basename'], 'recorded', conn)
         conn.close()
@@ -55,11 +81,6 @@ class Root(object):
                                  'showlist': []}
             show = titles[title]
             showlist = show['showlist']
-            imgname = e['basename']+".png"
-            if os.path.exists(os.path.join(path, imgname)):
-                e['imgname'] = imgname
-            else:
-                e['imgname'] = None
             showlist.append(e)
 
     def _getgroup(self, id):
@@ -84,7 +105,7 @@ class Root(object):
     @cherrypy.expose
     def group(self, id):
         (key, group) = self._getgroup(id)
-        tmpl = loader.load('group_contents.html')
+        tmpl = self.loader.load('group_contents.html')
         context = {'id': id,
                    'name': key,
                    'group': group,
@@ -96,54 +117,51 @@ class Root(object):
     def subgroup(self, id, sid):
         (key, group) = self._getgroup(id)
         (title, shows) = self._getshows(sid, group)
-        tmpl = loader.load('subgroup_contents.html')
+        tmpl = self.loader.load('subgroup_contents.html')
+        media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/%s" % (self.share,)
         context = {'id': id, 'sid': sid,
                    'gname': key,
                    'group': group,
                    'shows': shows,
                    'title': title,
-                   'media': "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/library/",
+                   'media': media_url,
                    'root': self }
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 
     @cherrypy.expose
     def index(self):
-        tmpl = loader.load('index.html')
+        tmpl = self.loader.load('index.html')
         context = {'title': "MythTV Groups",
                    'root': self }
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 
-path = '/video/library'
 def main():
-    import ConfigParser
     data = {}
 
-    options = ConfigParser.ConfigParser()
-    options.readfp(open('mythpch.cfg'))
-    user = options.get("global", "user")
-    password = options.get("global", "password")
-
-    print "Using MySQL user '%s'." % (user,)
-
+    # This is all to configure the CherryPy server
+    static_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), 'static'))
     base_config = {
             'tools.encode.on': True,
             'tools.decode.on': True,
             'tools.trailing_slash.on': True,
             'log.screen': True,
             'log.error_file': 'server.log',
-            'tools.staticdir.root': '/video'
+            'tools.staticdir.root': static_dir
     }
 
-    conf = {'/': { 'tools.staticdir.root': '/video'},
+    conf = {'/': { 'tools.staticdir.root': static_dir},
             '/media': { 'tools.staticdir.on': True,
-                        'tools.staticdir.dir': 'library' }}
+                        'tools.staticdir.dir': 'media' }}
 
+    # Create the root application object
+    root = Root()
 
     cherrypy.config.update(base_config)
 
-    cherrypy.quickstart(Root(user, password), '/', config=conf)
+    cherrypy.quickstart(root, '/', config=conf)
 
 if __name__ == '__main__':
     main()
