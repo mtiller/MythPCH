@@ -32,6 +32,7 @@ def stitch(t, k):
 class Root(object):
     def __init__(self):
         import ConfigParser
+        import urllib
 
         # Open configuration file
         conf_file = os.path.join(os.path.dirname(__file__), 'mythpch.cfg')
@@ -45,10 +46,10 @@ class Root(object):
         self.share = options.get("samba", "share")
 
         # Connect to the SQL database
-        conn = MySQLdb.connect(host,
-                               user=user,
-                               passwd=password,
-                               db='mythconverg')
+        self.conn = MySQLdb.connect(host,
+                                    user=user,
+                                    passwd=password,
+                                    db='mythconverg')
 
         # Create the template loader
         self.loader = TemplateLoader(
@@ -59,14 +60,13 @@ class Root(object):
         # version since the data is then static from that point
         # on.  :-(
         entries = fetch(['title','subtitle','description',
-                         'recgroup','basename'], 'recorded', conn)
-        conn.close()
+                         'recgroup','basename'], 'recorded', self.conn)
         self.entries = entries
         self.groups = {}
         for e in entries:
             # First, make sure we have a group
             # for each recording group
-            recgroup = e['recgroup']
+            recgroup = urllib.quote(e['recgroup'])
             if not recgroup in self.groups:
                 self.groups[recgroup] = {'id': str(len(self.groups)+1),
                                          'titles': {}}
@@ -130,10 +130,65 @@ class Root(object):
         return gen.render('html', doctype='html')
 
     @cherrypy.expose
-    def index(self):
+    def bytitle(self, recgroup, title):
+        import urllib
+        cursor = self.conn.cursor()
+        data = fetch(['recgroup','title','subtitle','description','basename'],
+                     'recorded', self.conn)
+        print "data = ", data
+        results = []
+        for d in data:
+            if d['recgroup']==recgroup and d['title']==title:
+                results.append(d)
+        print "results = ", results
+        media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/%s" % (self.share,)
+        context = {'name': "name",
+                   'recgroup': recgroup,
+                   'title': title,
+                   'media': media_url,
+                   'results': results }
+        tmpl = self.loader.load('subgroup_contents.html')
+        gen = tmpl.generate(**context)
+        return gen.render('html', doctype='html')
+
+    @cherrypy.expose
+    def recgroup(self, name):
+        import urllib
+        cursor = self.conn.cursor()
+        data = fetch(['recgroup','title'], 'recorded', self.conn)
+        print "data = ", data
+        results = {}
+        for d in data:
+            if d['recgroup']==name:
+                results[d['title']] = urllib.quote(d['title'])
+        print "results = ", results
+        context = {'name': "name",
+                   'recgroup': urllib.quote(name),
+                   'results': results }
+        tmpl = self.loader.load('group_contents.html')
+        gen = tmpl.generate(**context)
+        return gen.render('html', doctype='html')
+
+    @cherrypy.expose
+    def index2(self):
         tmpl = self.loader.load('index.html')
         context = {'title': "MythTV Groups",
                    'root': self }
+        gen = tmpl.generate(**context)
+        return gen.render('html', doctype='html')
+
+    @cherrypy.expose
+    def index(self):
+        import urllib
+        tmpl = self.loader.load('index.html')
+        cursor = self.conn.cursor()
+        data = fetch(['recgroup'], 'recorded', self.conn)
+        namemap = {}
+        for d in data:
+            namemap[d['recgroup']] = urllib.quote(d['recgroup'])
+        
+        context = {'title': "MythTV Groups",
+                   'namemap': namemap }
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 

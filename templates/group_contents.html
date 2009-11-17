@@ -10,10 +10,10 @@
     </div>
 
     <table width="100%">
-      <py:for each="title in group.titles">
+      <py:for each="title in results">
 	<tr>
 	  <td align="center">
-	    <a href="/subgroup/${id}/${group.titles[title].id}">${title}</a>
+	    <a href="/bytitle/${recgroup}/${results[title]}">${title}</a>
 	  </td>
         </tr>
       </py:for>

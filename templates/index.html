@@ -10,9 +10,9 @@
     </div>
 
     <table width="100%">
-      <py:for each="e in root.groups">
+      <py:for each="name in namemap">
 	<tr>
-	  <td align="center"><a href="/group/${root.groups[e].id}">${e}</a></td>
+	  <td align="center"><a href="/recgroup/${namemap[name]}">${name}</a></td>
 	</tr>
       </py:for>
     </table>

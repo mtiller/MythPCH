@@ -6,12 +6,12 @@
   </head>
   <body class="index">
     <div align="center" id="header">
-      <h1>${gname}</h1>
+      <h1>${recgroup}</h1>
       <h2>${title}</h2>
     </div>
 
     <table width="100%">
-      <py:for each="show in shows">
+      <py:for each="show in results">
 	<tr>
 	  <td align="center">
 	    <a href="${media}/${show.basename}"
