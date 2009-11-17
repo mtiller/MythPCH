@@ -1,0 +1,22 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      lang="en">
+  <head>
+    <title>${name}</title>
+  </head>
+  <body class="index">
+    <div align="center" id="header">
+      <h1>${name}</h1>
+    </div>
+
+    <table width="100%">
+      <py:for each="title in group.titles">
+	<tr>
+	  <td align="center">
+	    <a href="/subgroup/${id}/${group.titles[title].id}">${title}</a>
+	  </td>
+        </tr>
+      </py:for>
+    </table>
+  </body>
+</html>

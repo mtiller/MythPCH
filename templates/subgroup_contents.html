@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      lang="en">
+  <head>
+    <title>${title}</title>
+  </head>
+  <body class="index">
+    <div align="center" id="header">
+      <h1>${gname}</h1>
+      <h2>${title}</h2>
+    </div>
+
+    <table width="100%">
+      <py:for each="show in shows">
+	<tr>
+	  <td align="center">
+	    <a href="${media}/${show.basename}"
+	       TVID="Play"
+	       vod="true">
+	      ${show.subtitle}
+	    </a>
+	    <br/>
+	    ${show.description}
+	  </td>
+        </tr>
+      </py:for>
+    </table>
+  </body>
+</html>
