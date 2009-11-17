@@ -89,7 +89,7 @@ class Root(object):
             if d['recgroup']==name:
                 results[d['title']] = urllib.quote(d['title'])
         print "results = ", results
-        context = {'name': "name",
+        context = {'name': name,
                    'recgroup': urllib.quote(name),
                    'results': results }
         tmpl = self.loader.load('group_contents.html')
