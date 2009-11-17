@@ -56,79 +56,6 @@ class Root(object):
             os.path.join(os.path.dirname(__file__), 'templates'),
             auto_reload=True)
 
-        # Load MySQL data.  This is a serious limitation in this
-        # version since the data is then static from that point
-        # on.  :-(
-        entries = fetch(['title','subtitle','description',
-                         'recgroup','basename'], 'recorded', self.conn)
-        self.entries = entries
-        self.groups = {}
-        for e in entries:
-            # First, make sure we have a group
-            # for each recording group
-            recgroup = urllib.quote(e['recgroup'])
-            if not recgroup in self.groups:
-                self.groups[recgroup] = {'id': str(len(self.groups)+1),
-                                         'titles': {}}
-            group = self.groups[recgroup]
-            titles = group['titles']
-            # Get the subgroup of shows
-            title = e['title']
-            # Check to see if there is already a list of shows
-            # with a given title
-            if not title in titles:
-                titles[title] = {'id': str(len(titles)+1),
-                                 'showlist': []}
-            show = titles[title]
-            showlist = show['showlist']
-            showlist.append(e)
-
-    def _getgroup(self, id):
-        group = None
-        key = None
-        for g in self.groups:
-            if self.groups[g]['id']==id:
-                key = g
-                group = self.groups[g]
-        return (key, group)
-
-    def _getshows(self, sid, group):
-        shows = None
-        title = None
-        titles = group['titles']
-        for show in titles:
-            if titles[show]['id']==sid:
-                shows = titles[show]['showlist']
-                title = show
-        return (title, shows)
-
-    @cherrypy.expose
-    def group(self, id):
-        (key, group) = self._getgroup(id)
-        tmpl = self.loader.load('group_contents.html')
-        context = {'id': id,
-                   'name': key,
-                   'group': group,
-                   'root': self }
-        gen = tmpl.generate(**context)
-        return gen.render('html', doctype='html')
-
-    @cherrypy.expose
-    def subgroup(self, id, sid):
-        (key, group) = self._getgroup(id)
-        (title, shows) = self._getshows(sid, group)
-        tmpl = self.loader.load('subgroup_contents.html')
-        media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/%s" % (self.share,)
-        context = {'id': id, 'sid': sid,
-                   'gname': key,
-                   'group': group,
-                   'shows': shows,
-                   'title': title,
-                   'media': media_url,
-                   'root': self }
-        gen = tmpl.generate(**context)
-        return gen.render('html', doctype='html')
-
     @cherrypy.expose
     def bytitle(self, recgroup, title):
         import urllib
@@ -166,14 +93,6 @@ class Root(object):
                    'recgroup': urllib.quote(name),
                    'results': results }
         tmpl = self.loader.load('group_contents.html')
-        gen = tmpl.generate(**context)
-        return gen.render('html', doctype='html')
-
-    @cherrypy.expose
-    def index2(self):
-        tmpl = self.loader.load('index.html')
-        context = {'title': "MythTV Groups",
-                   'root': self }
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 
