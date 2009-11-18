@@ -10,13 +10,22 @@ import MySQLdb
 # that queries the DB for specific
 # fields and then returns the result
 # in a dictionary
-def fetch(k, table, conn):
+def fetch(k, table, conn, add=""):
     cursor = conn.cursor()
-    cmd = "SELECT %s FROM %s" % (",".join(k), table)
+    fields = []
+    names = []
+    for name in k:
+        if type(name)==tuple:
+            fields.append(name[0])
+            names.append(name[1])
+        else:
+            fields.append(name)
+            names.append(name)
+    cmd = "SELECT %s FROM %s %s" % (",".join(fields), table, add)
     cursor.execute(cmd)
     entries = []
     for row in cursor.fetchall():
-        entries.append(stitch(row, k))
+        entries.append(stitch(row, names))
     cursor.close()
     return entries
 
@@ -60,14 +69,14 @@ class Root(object):
     def bytitle(self, recgroup, title):
         import urllib
         cursor = self.conn.cursor()
-        data = fetch(['recgroup','title','subtitle','description','basename'],
-                     'recorded', self.conn)
-        print "data = ", data
+        data = fetch(['recgroup','title','subtitle',
+                      'description','basename',
+                      ("DATE_FORMAT(starttime, '%m/%e')",'starttime')],
+                     'recorded', self.conn, "ORDER BY starttime")
         results = []
         for d in data:
             if d['recgroup']==recgroup and d['title']==title:
                 results.append(d)
-        print "results = ", results
         media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/%s" % (self.share,)
         context = {'name': "name",
                    'recgroup': recgroup,
@@ -83,14 +92,17 @@ class Root(object):
         import urllib
         cursor = self.conn.cursor()
         data = fetch(['recgroup','title'], 'recorded', self.conn)
-        print "data = ", data
         results = {}
+        counts = {}
         for d in data:
             if d['recgroup']==name:
                 results[d['title']] = urllib.quote(d['title'])
-        print "results = ", results
+            if not d['title'] in counts:
+                counts[d['title']] = 0
+            counts[d['title']] = counts[d['title']] + 1
         context = {'name': name,
                    'recgroup': urllib.quote(name),
+                   'counts': counts, 
                    'results': results }
         tmpl = self.loader.load('group_contents.html')
         gen = tmpl.generate(**context)
