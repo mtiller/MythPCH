@@ -76,8 +76,11 @@ class Root(object):
         results = []
         for d in data:
             if d['recgroup']==recgroup and d['title']==title:
+		if d['subtitle']==None or len(d['subtitle'])==0:
+			d['subtitle'] = "<No Sub-Title Given>"
                 results.append(d)
-        media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/%s" % (self.share,)
+        media_url = "file:///opt/sybhttpd/localhost.drives/NETWORK_SHARE/"+\
+            self.share
         context = {'name': "name",
                    'recgroup': recgroup,
                    'title': title,
@@ -123,7 +126,7 @@ class Root(object):
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 
-def main():
+def config_server():
     data = {}
 
     # This is all to configure the CherryPy server
@@ -131,6 +134,8 @@ def main():
         os.path.join(os.path.dirname(__file__), 'static'))
     base_config = {
             'tools.encode.on': True,
+            'cherrypy.engine.SIGHUP': None,
+            'cherrypy.engine.SIGTERM': None,
             'tools.decode.on': True,
             'tools.trailing_slash.on': True,
             'log.screen': True,
@@ -142,10 +147,26 @@ def main():
             '/media': { 'tools.staticdir.on': True,
                         'tools.staticdir.dir': 'media' }}
 
+    cherrypy.config.update(base_config)
+
+    return conf
+    
+# This function gets called from Apache
+def setup_server():
+    config_server()
+
+    cherrypy.engine.SIGHUP = None
+    cherrypy.engine.SIGTERM = None
+
+    cherrypy.tree.mount(Root())
+
+# This function gets invoked if you run this from the command line
+# and CherryPy supplies the server handling
+def main():
+    conf = config_server()
+
     # Create the root application object
     root = Root()
-
-    cherrypy.config.update(base_config)
 
     cherrypy.quickstart(root, '/', config=conf)
 
