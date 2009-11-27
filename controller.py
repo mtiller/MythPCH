@@ -141,6 +141,8 @@ class Root(object):
     def delete(self, chanid, year, month, day, hour, minute):
         (con, r) = self._findshow(chanid, year, month, day, hour, minute)
         con.deleteRecording(r)
+        raise cherrypy.HTTPRedirect( "/" )
+
 
     @cherrypy.expose
     def index(self):
