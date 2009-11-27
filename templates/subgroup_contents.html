@@ -18,9 +18,9 @@
 	       TVID="Play"
 	       vod="true">
 	      <b>${show.subtitle}</b>
-	    </a> <i>(Aired: ${show.starttime})</i>
+	    </a> <i>(Aired: ${show.endtime})</i>
 	    <br/>
-	    ${show.description}
+	    ${show.description} (<a href="/prompt/${show.chanid}/${show.starttime.year}/${show.starttime.month}/${show.starttime.day}/${show.starttime.hour}/${show.starttime.minute}">Delete</a>)
 	  </td>
         </tr>
       </py:for>

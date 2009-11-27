@@ -1,3 +1,7 @@
 CherryPy 3.x
 Genshi
 MySQLdb
+
+You must make sure that www-data can access the config.xml file for
+MythTV.  I did this as a hack by copying /etc/mythtv/config.xml to
+/var/www/.mythtv/config.xml.

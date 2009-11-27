@@ -70,8 +70,9 @@ class Root(object):
         import urllib
         cursor = self.conn.cursor()
         data = fetch(['recgroup','title','subtitle',
-                      'description','basename',
-                      ("DATE_FORMAT(starttime, '%m/%e')",'starttime')],
+                      'description','basename', 'chanid',
+                      'starttime',
+                      ("DATE_FORMAT(endtime, '%m/%e')",'endtime')],
                      'recorded', self.conn, "ORDER BY starttime")
         results = []
         for d in data:
@@ -111,6 +112,36 @@ class Root(object):
         gen = tmpl.generate(**context)
         return gen.render('html', doctype='html')
 
+    def _findshow(self, chanid, year, month, day, hour, minute):
+        import MythTV
+        import sys
+
+        sys.argv = ["fake", "--host", "localhost"]
+        con = MythTV.MythTV()
+        rs = con.getRecordings()
+        for r in rs:
+            st = r.starttime
+            if r.chanid==int(chanid) and st.year==int(year) and \
+               st.month==int(month) and st.day==int(day) and \
+               st.hour==int(hour) and st.minute==int(minute):
+               return (con, r)
+        return (None, None)
+        
+    @cherrypy.expose
+    def prompt(self, chanid, year, month, day, hour, minute):
+        (con, r) = self._findshow(chanid, year, month, day, hour, minute)
+        tmpl = self.loader.load('delete_show.html')
+        context = {'year': year, 'month': month, 'day': day,
+                   'hour': hour, 'minute': minute,
+                   'chanid': chanid, 'title': r.title}
+        gen = tmpl.generate(**context)
+        return gen.render('html', doctype='html')
+
+    @cherrypy.expose
+    def delete(self, chanid, year, month, day, hour, minute):
+        (con, r) = self._findshow(chanid, year, month, day, hour, minute)
+        con.deleteRecording(r)
+
     @cherrypy.expose
     def index(self):
         import urllib
@@ -140,7 +171,9 @@ def config_server():
             'tools.trailing_slash.on': True,
             'log.screen': True,
             'log.error_file': 'server.log',
-            'tools.staticdir.root': static_dir
+            'tools.staticdir.root': static_dir,
+            'global': { 'server.socket_host': '0.0.0.0',
+		        'server.socket_port': 8080 }
     }
 
     conf = {'/': { 'tools.staticdir.root': static_dir},
