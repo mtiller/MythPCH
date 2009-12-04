@@ -165,6 +165,7 @@ def config_server():
     # This is all to configure the CherryPy server
     static_dir = os.path.abspath(
         os.path.join(os.path.dirname(__file__), 'static'))
+    print "static dir = ", static_dir
     base_config = {
             'tools.encode.on': True,
             'cherrypy.engine.SIGHUP': None,
@@ -174,6 +175,8 @@ def config_server():
             'log.screen': True,
             'log.error_file': 'server.log',
             'tools.staticdir.root': static_dir,
+            '/media': { 'tools.staticdir.on': True,
+                        'tools.staticdir.dir': 'media' },
             'global': { 'server.socket_host': '0.0.0.0',
 		        'server.socket_port': 8080 }
     }

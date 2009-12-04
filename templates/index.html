@@ -1,10 +1,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       lang="en">
   <head>
     <title>$title</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta SYABAS-FULLSCREEN="true"/>
+    <meta SYABAS-BACKGROUND="file:///opt/sybhttpd/localhost.images/sd/bg.jpg"/>
+    <xi:include href="head.html"/>
   </head>
-  <body class="index">
+  <body class="index"
+	background="file:///opt/sybhttpd/localhost.images/sd/bg.jpg">
     <div align="center" id="header">
       <h1>$title</h1>
     </div>
@@ -12,7 +18,11 @@
     <table width="100%">
       <py:for each="name in namemap">
 	<tr>
-	  <td align="center"><b><a href="/recgroup/${namemap[name]}">${name}</a></b></td>
+	  <td align="center" class="txt">
+	    <b>
+	      <a href="/recgroup/${namemap[name]}">${name}</a>
+	    </b>
+	  </td>
 	</tr>
       </py:for>
     </table>
