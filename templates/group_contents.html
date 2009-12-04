@@ -1,20 +1,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       lang="en">
+  <xi:include href="base.html" />
   <head>
     <title>${name}</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<meta SYABAS-FULLSCREEN="true">
-<meta SYABAS-BACKGROUND="file:///opt/sybhttpd/localhost.images/sd/bg.jpg">
-<style type="type/css">
-	.menu       {font-size:14px;color:user1;font-weight:bold;}
-	.menu_h     {font-size:14px;color:user3;font-weight:bold;}
-	.txt        {font-size:14px;color:user1;font-weight:bold;}
-	.server     {font-size:14px;color:user2;font-weight:bold;}
-	.title {font-size:24px;color:user1;font-weight:bold;}
-</style>
   </head>
-  <body class="index" background="media/HardwoodNight.jpg">
+  <body>
     <div align="center" id="header">
 	<h1>${name}</h1>
     </div>
@@ -22,7 +14,7 @@
     <table width="100%">
       <py:for each="title in results">
 	<tr>
-	  <td align="center" class="txt">>
+	  <td align="center" class="txt">
 	    <b>
 	      <a href="/bytitle/${recgroup}/${results[title]}">${title}</a>
 	    </b> (${counts[title]})
