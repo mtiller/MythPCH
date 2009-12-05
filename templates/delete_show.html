@@ -1,16 +1,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       lang="en">
+  <xi:include href="base.html" />
   <head>
     <title>Delete ${title}</title>
   </head>
-  <body class="index">
+  <body>
     <p>
-      <h1>${title} from ${month}/${day}/${year}</h1>
+      <h1 class="title">${title} from ${month}/${day}/${year}</h1>
       Are you sure you want to delete this show?
     </p>
     <br/>
-
-    <a href="/delete/${chanid}/${year}/${month}/${day}/${hour}/${minute}">Yes</a>
+    <font size="2" color="user1">
+      <a href="/delete/${chanid}/${year}/${month}/${day}/${hour}/${minute}">
+	Yes
+      </a>
+    </font>
   </body>
 </html>

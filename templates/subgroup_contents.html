@@ -1,26 +1,33 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       lang="en">
+  <xi:include href="base.html" />
   <head>
     <title>${title}</title>
   </head>
-  <body class="index">
+  <body>
     <div align="center" id="header">
-      <h1>${recgroup}</h1>
-      <h2>${title}</h2>
+      <h1 class="title">${recgroup}</h1>
+      <h2 class="subtitle">${title}</h2>
+      <hr/>
     </div>
-
     <table width="100%">
       <py:for each="show in results">
 	<tr>
-	  <td align="center">
-	    <a href="${media}/${show.basename}"
-	       TVID="Play"
-	       vod="true">
-	      <b>${show.subtitle}</b>
-	    </a> <i>(Aired: ${show.endtime})</i>
+	  <td align="center" class="txt">
+	      <a href="${media}/${show.basename}"
+		 TVID="Play"
+		 vod="true">
+		<b><font size="4" color="user1">${show.subtitle}</font></b>
+	      </a>&nbsp;&nbsp;
+	      <font size="4" color="user1">
+		<i>(Aired: ${show.endtime})</i>
+	      </font>
 	    <br/>
+	    <font size="3" color="black">
 	    ${show.description} (<a href="/prompt/${show.chanid}/${show.starttime.year}/${show.starttime.month}/${show.starttime.day}/${show.starttime.hour}/${show.starttime.minute}">Delete</a>)
+	    </font>
 	  </td>
         </tr>
       </py:for>

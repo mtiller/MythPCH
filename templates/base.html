@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      py:strip=""
+      lang="en">
+  <py:match path="head" once="true">
+    <head>
+      ${select('*|text()')}
+      <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+      <meta SYABAS-FULLSCREEN="true"/>
+      <meta SYABAS-BACKGROUND="file:///opt/sybhttpd/localhost.images/sd/bg.jpg"/>
+      <style type="type/css">
+	.menu       {font-size:14px;color:user1;font-weight:bold;}
+	.menu_h     {font-size:14px;color:user3;font-weight:bold;}
+	.txt        {font-size:14px;color:user1;font-weight:bold;}
+	.server     {font-size:14px;color:user2;font-weight:bold;}
+	.title {font-size:32px;color:black;font-weight:bold;}
+	.subtitle {font-size:16px;color:black;font-weight:bold;}
+      </style>
+    </head>
+  </py:match>
+  <py:match path="body">
+    <body class="index"
+	  focushighlight="user5"
+	  bgcolor="#398EC4"
+	  focustext="user3"
+	  file="true"
+	  onloadset="1"
+	  background="file:///opt/sybhttpd/localhost.images/sd/bg.jpg">
+      ${select('*|text()')}
+    </body>
+  </py:match>
+</html>

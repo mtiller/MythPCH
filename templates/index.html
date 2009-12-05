@@ -1,18 +1,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
       lang="en">
+  <xi:include href="base.html" />
   <head>
     <title>$title</title>
   </head>
-  <body class="index">
+  <body>
     <div align="center" id="header">
-      <h1>$title</h1>
+      <h1 class="title">$title</h1>
+      <hr/>
     </div>
-	<br/>
     <table width="100%">
       <py:for each="name in namemap">
 	<tr>
-	  <td align="center"><b><a href="/recgroup/${namemap[name]}">${name}</a></b></td>
+	  <td align="center" class="txt">
+	    <a class="txt" href="/recgroup/${namemap[name]}">
+	      <font size="4" color="user1"><b>${name}</b></font>
+	    </a>
+	  </td>
 	</tr>
       </py:for>
     </table>
