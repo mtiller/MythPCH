@@ -9,17 +9,15 @@
   <body>
     <div align="center" id="header">
       <h1 class="title">$title</h1>
+      <hr/>
     </div>
-    <br/>
     <table width="100%">
       <py:for each="name in namemap">
 	<tr>
 	  <td align="center" class="txt">
-	    <b>
-	      <font size="2" color="user1">
-		<a class="txt" href="/recgroup/${namemap[name]}">${name}</a>
-	      </font>
-	    </b>
+	    <a class="txt" href="/recgroup/${namemap[name]}">
+	      <font size="4" color="user1"><b>${name}</b></font>
+	    </a>
 	  </td>
 	</tr>
       </py:for>

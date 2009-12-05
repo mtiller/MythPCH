@@ -8,16 +8,18 @@
   </head>
   <body>
     <div align="center" id="header">
-	<h1>${name}</h1>
+	<h1 class="title">${name}</h1>
+	<hr/>
     </div>
-	<br/>
     <table width="100%">
       <py:for each="title in results">
 	<tr>
 	  <td align="center" class="txt">
-	    <b>
-	      <a href="/bytitle/${recgroup}/${results[title]}">${title}</a>
-	    </b> (${counts[title]})
+	      <a href="/bytitle/${recgroup}/${results[title]}">
+		<b><font size="4" color="user1">${title}</font></b>
+	      </a>
+	    &nbsp;&nbsp;
+	    <font size="4" color="user1">(${counts[title]})</font>
 	  </td>
         </tr>
       </py:for>
