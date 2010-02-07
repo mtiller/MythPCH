@@ -10,8 +10,8 @@ import MySQLdb
 # that queries the DB for specific
 # fields and then returns the result
 # in a dictionary
-def fetch(k, table, conn, add=""):
-    cursor = conn.cursor()
+def fetch(k, table, root, add=""):
+    cursor = root.cursor()
     fields = []
     names = []
     for name in k:
@@ -58,22 +58,36 @@ class Root(object):
         self.conn = MySQLdb.connect(host,
                                     user=user,
                                     passwd=password,
-                                    db='mythconverg')
+                                    db='mythconverg',
+                                    use_unicode=True)
 
         # Create the template loader
         self.loader = TemplateLoader(
             os.path.join(os.path.dirname(__file__), 'templates'),
             auto_reload=True)
 
+    def cursor(self):
+        try:
+            cursor = self.conn.cursor()
+        except OperationalError:
+            self.conn = MySQLdb.connect(host,
+                                    user=user,
+                                    passwd=password,
+                                    db='mythconverg',
+                                    use_unicode=True)
+            cursor = self.conn.cursor()
+        return cursor
+            
+
     @cherrypy.expose
     def bytitle(self, recgroup, title):
         import urllib
-        cursor = self.conn.cursor()
+        cursor = self.cursor()
         data = fetch(['recgroup','title','subtitle',
                       'description','basename', 'chanid',
                       'starttime',
                       ("DATE_FORMAT(endtime, '%m/%e')",'endtime')],
-                     'recorded', self.conn, "ORDER BY starttime")
+                     'recorded', self, "ORDER BY starttime")
         results = []
         for d in data:
             if d['recgroup']==recgroup and d['title']==title:
@@ -94,8 +108,8 @@ class Root(object):
     @cherrypy.expose
     def recgroup(self, name):
         import urllib
-        cursor = self.conn.cursor()
-        data = fetch(['recgroup','title'], 'recorded', self.conn)
+        cursor = self.cursor()
+        data = fetch(['recgroup','title'], 'recorded', self)
         results = {}
         counts = {}
         for d in data:
@@ -148,8 +162,8 @@ class Root(object):
     def index(self):
         import urllib
         tmpl = self.loader.load('index.html')
-        cursor = self.conn.cursor()
-        data = fetch(['recgroup'], 'recorded', self.conn)
+        cursor = self.cursor()
+        data = fetch(['recgroup'], 'recorded', self)
         namemap = {}
         for d in data:
             namemap[d['recgroup']] = urllib.quote(d['recgroup'])
