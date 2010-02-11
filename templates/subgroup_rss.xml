@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:py="http://genshi.edgewall.org/" version="2.0">
+<channel>
+<title>${recgroup} - ${title}</title>
+<link>http://mythtv.mtiller.net/</link>
+<py:for each="show in results">
+  <item>
+    <title>${show.subtitle}</title>
+    <enclosure url="${media}/${show.basename}" length="${show.length}" type="video/mpeg"/>
+    <pubDate>${show.endtime}</pubDate>
+  </item>
+</py:for>
+</channel>
+</rss>

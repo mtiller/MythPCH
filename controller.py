@@ -78,6 +78,34 @@ class Root(object):
             cursor = self.conn.cursor()
         return cursor
             
+    @cherrypy.expose
+    def rss(self, recgroup, title):
+        import urllib
+        import os
+        cursor = self.cursor()
+        data = fetch(['recgroup','title','subtitle',
+                      'description','basename', 'chanid',
+                      'starttime',
+                      ("DATE_FORMAT(endtime, '%m/%e')",'endtime')],
+                     'recorded', self, "ORDER BY starttime")
+        results = []
+        for d in data:
+            if d['recgroup']==recgroup and d['title']==title:
+		if d['subtitle']==None or len(d['subtitle'])==0:
+			d['subtitle'] = "<No Sub-Title Given>"
+                fname = "/data/video/library/"+d['basename']
+                d['length'] = os.stat(fname).st_size
+                results.append(d)
+        media_url = "file:///data/video/library/"+\
+            self.share
+        context = {'name': "name",
+                   'recgroup': recgroup,
+                   'title': title,
+                   'media': media_url,
+                   'results': results }
+        tmpl = self.loader.load('subgroup_rss.xml')
+        gen = tmpl.generate(**context)
+        return gen.render('xml', doctype='xhtml')
 
     @cherrypy.expose
     def bytitle(self, recgroup, title):
