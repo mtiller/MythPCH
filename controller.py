@@ -68,6 +68,12 @@ class Root(object):
 
     def cursor(self):
         try:
+            # These are all here to make sure the
+            # connection is still alive.  Is there
+            # a better way?
+            self.conn.get_server_info()
+            self.conn.ping()
+            self.conn.stat()
             cursor = self.conn.cursor()
         except OperationalError:
             self.conn = MySQLdb.connect(host,
